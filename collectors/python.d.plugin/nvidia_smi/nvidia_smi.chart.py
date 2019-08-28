@@ -10,7 +10,7 @@ import xml.etree.ElementTree as et
 from bases.collection import find_binary
 from bases.FrameworkServices.SimpleService import SimpleService
 
-disabled_by_default = True
+disabled_by_default = False
 
 
 NVIDIA_SMI = 'nvidia-smi'
