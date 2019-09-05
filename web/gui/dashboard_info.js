@@ -388,6 +388,12 @@ netdataDashboard.menu = {
         info: undefined
     },
 
+    'powertop': {
+        title: 'Powertop',
+        icon: '<i class="fas fa-random"></i>',
+        info: undefined
+    },
+
     'go_expvar': {
         title: 'Go - expvars',
         icon: '<i class="fas fa-eye"></i>',

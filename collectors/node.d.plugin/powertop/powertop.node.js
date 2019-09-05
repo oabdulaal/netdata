@@ -2,6 +2,7 @@ var Client = require('lib/ssh2/client').Client;
 var fs = require('fs');
 var html2json = require('html2json').html2json;
 var netdata = require("netdata");
+const nodeprocess = require('process');
 
 
 // the processor is needed only
@@ -50,40 +51,48 @@ netdata.processors.powertop = {
 
         var conn = new Client();
         conn.on('ready', function() {
-        netdata.debug('Client :: ready');
-        conn.exec('echo felouka | sudo -S powertop --time=1 --html="./powertop.html"', function(err, stream) {
-            if (err) throw err;
-            stream.on('close', function(code, signal) {
-                res = []
-                fs.readFile('/home/ricknmorty/powertop.html', 'utf8', function(err, data){
-                    // netdata.debug("Read from file: " + data)
-                    var doc = html2json(data)
-                    var rows = doc.child[0].child[3].child[16].child[3].child;
-                    
-                    for(var i = 1; i < rows.length; i+=2){
-                        row = rows[i].child
-                        usage = row[1].child[0].text.trim()
-                        category = row[row.length - 4].child[0].text.trim()
-                        desc = row[row.length - 2].child[0].text.trim()
-                        if(category == "Process"){
-                            pid = desc.match(/[0-9]+/g)[0]
-                            microsec = usage.match(/us/g)
-                            value = parseFloat(usage.match(/[0-9]+\.[0-9]+/g))
-                            if (microsec != null){
-                                value = value/1000
-                            }
-                            res.push({pid, value})
+            netdata.debug('Client :: ready');
+            netdata.debug('Node version is: ' + nodeprocess.version);
+            conn.exec('echo felouka | sudo -S powertop --time=1 --html="./powertop.html"', function(err, stream) {
+                if (err) {
+                    netdata.debug("ERROR EXEC COMMAND: " + err)
+                    throw err;
+                }
+                stream.on('close', function(code, signal) {
+                    res = []
+                    fs.readFile('/home/ricknmorty/powertop.html', 'utf8', function(err, data){
+                        if (err) {
+                            netdata.debug("ERROR READING HTML: " + err)
+                            throw err;
                         }
-                    }
-                    netdata.debug("Returning: " + res)
-                    callback(res)    
-                })
-                conn.end();
-            }).on('data', function(data) {
-                // console.log('STDOUT: ' + data);
+                        var doc = html2json(data)
+                        var rows = doc.child[0].child[3].child[16].child[3].child;
+                        
+                        for(var i = 1; i < rows.length; i+=2){
+                            row = rows[i].child
+                            usage = row[1].child[0].text.trim()
+                            category = row[row.length - 4].child[0].text.trim()
+                            desc = row[row.length - 2].child[0].text.trim()
+                            if(category == "Process"){
+                                pid = desc.match(/[0-9]+/g)[0]
+                                microsec = usage.match(/us/g)
+                                value = parseFloat(usage.match(/[0-9]+\.[0-9]+/g))
+                                if (microsec != null){
+                                    value = value/1000
+                                }
+                                res.push({pid, value})
+                            }
+                        }
+                        netdata.debug("Returning: " + res)
+                        // conn.end();
+                        callback(res)    
+                    })
+                    
+                }).on('data', function(data) {
+                    // console.log('STDOUT: ' + data);
+                });
+                
             });
-            
-        });
         }).connect({
             host: 'localhost',
             username: 'ricknmorty',
@@ -97,16 +106,19 @@ netdata.processors.powertop = {
 // this is the powertop definition
 var powertop = {
 	processResponse: function(service, data) {
-
+        netdata.debug("Process Response")
         /* send information to the Netdata server here */
         if (data === null) {
             return;
         }
-        if(service.added !== true)
-            service.commit();
+        // if(service.added !== true)
+        service.commit();
 
         dims = {}
-        for (var i = 0; i < data.length; i++){
+        data = data.sort(function (a, b) {
+            return b.value - a.value;
+        });
+        for (var i = 0; i < data.length && i < 6; i++){
             process = data[i]
             dims[process.pid] =  {
                 id: process.pid,                                     // the unique id of the dimension                       
@@ -129,18 +141,20 @@ var powertop = {
         netdata.debug("Starting response...")
         chart = service.chart("powertop", chart);
         service.begin(chart);
-        for (var i = 0; i < data.length; i++){
+        for (var i = 0; i < data.length && i < 6; i++){
             process = data[i]
-            netdata.debug("Adding to chart: " + process.pid + " " + process.value)
+            // netdata.debug("Adding to chart: " + process.pid + " " + process.value)
             service.set(process.pid, process.value)
 
         }
+        netdata.debug("Ending response...")
         service.end();
+        netdata.debug("Ending Service...")
 
 	},
 
 	configure: function(config) {
-
+        netdata.debug("Configure")
         /*
             * create a service using internal defaults;
             * this is used for auto-detecting the settings
@@ -160,7 +174,7 @@ var powertop = {
 	},
 
 	update: function(service, callback) {
-		
+		netdata.debug("update")
 		/*
 		 * this function is called when each service
 		 * created by the configure function, needs to

@@ -102,6 +102,8 @@ include uwsgi/Makefile.inc
 include varnish/Makefile.inc
 include w1sensor/Makefile.inc
 include web_log/Makefile.inc
+include powertop/Makefile.inc
+include s_tui/Makefile.inc
 
 pythonmodulesdir=$(pythondir)/python_modules
 dist_pythonmodules_DATA = \
@@ -243,3 +245,22 @@ dist_python_urllib3_securetransport_DATA = \
     python_modules/urllib3/contrib/_securetransport/bindings.py \
     python_modules/urllib3/contrib/_securetransport/low_level.py \
     $(NULL)
+
+pythonbs4dir=$(pythonmodulesdir)/bs4
+dist_pythonbs4_DATA = \
+    python_modules/bs4/__init__.py \
+    python_modules/bs4/dammit.py \
+    python_modules/bs4/diagnose.py \
+    python_modules/bs4/element.py \
+    python_modules/bs4/formatter.py \
+    python_modules/bs4/testing.py \
+    $(NULL)
+
+pythonbs4builderdir=$(pythonmodulesdir)/bs4/builder
+dist_pythonbs4builder_DATA = \
+    python_modules/bs4/builder/__init__.py \
+    python_modules/bs4/builder/_html5lib.py \
+    python_modules/bs4/builder/_htmlparser.py \
+    python_modules/bs4/builder/_lxml.py \
+    $(NULL)
+
