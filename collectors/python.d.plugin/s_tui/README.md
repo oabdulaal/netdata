@@ -4,7 +4,7 @@ This module monitors the [s-tui](https://github.com/amanusk/s-tui) cli tool.
 
 **Requirements and Notes:**
 
--   You must have the `s-tui` tool installed. [installation](https://github.com/amanusk/s-tui#simple-installation)
+-   You must have the `s-tui` tool v0.8.3 installed. Install it using `pip install s-tui==0.8.3`. [installation](https://github.com/amanusk/s-tui#simple-installation)
 
 -   Make sure that the plugin is enabled in `python.d.plugin/python.d.conf`.
 
