@@ -4,7 +4,9 @@ This module monitors the [powertop](https://wiki.archlinux.org/index.php/Powerto
 
 **Requirements and Notes:**
 
--   You must have the `powertop` tool installed. Example [for ubuntu 16.04](https://linoxide.com/linux-how-to/install-use-powertop-ubuntu-16-04/)
+-   You must have the `powertop` v2.9 installed. Its debian package (v2.9) is only available for Ubuntu 18.09. Example [for ubuntu 16.04 (Powertop v2.8)](https://linoxide.com/linux-how-to/install-use-powertop-ubuntu-16-04/)
+
+-   You must have [BeautifulSoup4](https://pypi.org/project/beautifulsoup4/) installed. 
 
 -   Make sure that the plugin is enabled in `python.d.plugin/python.d.conf`.
 
